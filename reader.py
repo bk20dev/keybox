@@ -1,6 +1,6 @@
 from machine import SPI, Pin
 
-from mfrc522 import MFRC522
+from lib.mfrc522 import MFRC522
 
 
 class Reader:

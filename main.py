@@ -1,6 +1,6 @@
 from machine import Pin, SPI
 
-from n74hc595 import N74HC595
+from lib.n74hc595 import N74HC595
 from reader import Reader
 
 builtin_led = Pin(25, Pin.OUT)
