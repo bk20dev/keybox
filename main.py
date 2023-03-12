@@ -1,7 +1,7 @@
 from machine import Pin, SPI
 
-from mfrc522 import MFRC522
 from n74hc595 import N74HC595
+from reader import Reader
 
 builtin_led = Pin(25, Pin.OUT)
 builtin_led.value(1)
@@ -20,25 +20,18 @@ led_read_ok = Pin(16, Pin.OUT)
 
 spi = SPI(0, baudrate=100000, polarity=0, phase=0, sck=sck, mosi=mosi, miso=miso)
 
-register = N74HC595(data_output, data_clock, register_latch, width=8)
-# reader = MFRC522(spi, sda, lambda pin: register[pin], width=8)
+register = N74HC595(data_output, data_clock, register_latch, width=8, val=0)
+reader = Reader(spi, sda, enable_pin=lambda pin: register[pin], width=2)
 
-reader = MFRC522(spi, sda, register[0])
-
+i = 0
 while True:
-    led.value(1)
-    reader.init()
-    (status, tag_type) = reader.request(MFRC522.REQIDL)
-    led.value(0)
-
-    if status == MFRC522.OK:
-        (status, uid) = reader.anticoll(MFRC522.PICC_ANTICOLL1)
-        if status == MFRC522.OK:
-            led_read_ok.value(1)
-            print(f"ok, {uid}")
-        else:
-            led_read_ok.value(0)
-            print("err: select_tag_sn")
+    card_id = reader[i]
+    if card_id is not None:
+        led_read_ok.value(1)
+        print(f"ok:\t{card_id}")
     else:
         led_read_ok.value(0)
-        print("err: request")
+        print("err:")
+    i += 1
+    if i >= len(reader):
+        i = 0
